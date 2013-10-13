@@ -1,7 +1,13 @@
+/* builds a list of primes to disk? */
+
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 typedef unsigned long long int uint_64;
+
+FILE *lg;
 
 struct prime_list {
 	uint_64 prime;
@@ -27,6 +33,7 @@ uint_64 is_prime(uint_64 n, struct primes *ps)
 	
 	while(n % prime || prime == 1) {
 		if (pl->next == NULL) {
+			fprintf(lg,"is_prime:\t%llu is prime\n",n);
 			return 1;
 		}
 		pl = pl->next;
@@ -45,7 +52,10 @@ uint_64 next_prime(struct primes *ps)
 
 	n = ps->largest->prime;
 
-	for (++n; !is_prime(n,ps); n++) {}
+	for (++n; !is_prime(n,ps); n++) {
+		fprintf(lg,"next_prime:\ttesting %llu\n",n);
+	}
+
 	new_p = malloc(sizeof(struct prime_list));
 	new_p->prime = n;
 	new_p->next = NULL;
@@ -59,11 +69,11 @@ uint_64 next_prime(struct primes *ps)
 void print_primes(struct primes *ps) 
 {
 	struct prime_list *pl;
-	printf("Primes Found:\n");
+	fprintf(lg,"Primes Found:\n");
 	for (pl = ps->smallest; pl->next != NULL; pl = pl->next) {
-		printf("%llu ",pl->prime);
+		fprintf(lg,"%llu ",pl->prime);
 	}
-	printf("\n");
+	fprintf(lg,"\n");
 }
 
 
@@ -73,6 +83,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr,"Enter the number for which to calculate the max prime factor.\n");
 		exit(1);
 	}
+
+	/* open file for logging */
+	lg = fopen("./log","w");
 
 	/* initialize variables and structures */
 	uint_64 in = strtoull(argv[1],NULL,10);
@@ -99,14 +112,14 @@ int main(int argc, char *argv[])
 	 */
 	for (n = 1; n <= ceiling; n = next_prime(ps)) {
 		if (!(in % n)) {
-			printf("main:\t %llu is a prime factor\n",n);
+			fprintf(lg,"main:\t %llu is a prime factor\n",n);
 			ceiling = in / n;
 			prime_factor = n;
 		}
 	}
 
 	print_primes(ps);
-	printf("Largest prime factor of %llu:\t%llu\n",in,prime_factor);
+	fprintf(lg,"Largest prime factor of %llu:\t%llu\n",in,prime_factor);
 
 	return prime_factor;
 }
