@@ -1,1 +1,3 @@
-holds all project Euler code files
+Holds all project Euler code files
+
+Files are organized by problem. Each directory has one or more solutions to the problem in different languages.
